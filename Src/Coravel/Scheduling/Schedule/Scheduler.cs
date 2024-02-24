@@ -204,16 +204,13 @@ namespace Coravel.Scheduling.Schedule
 
             foreach (var keyValue in this._tasks)
             {
-                var timerIsAtMinute = utcDate.Second == 0;
-                var taskIsSecondsBased = !keyValue.Value.ScheduledEvent.IsScheduledCronBasedTask();
                 var forceRunAtStart = isFirstTick && keyValue.Value.ScheduledEvent.ShouldRunOnceAtStart();
-                var canRunBasedOnTimeMarker = taskIsSecondsBased || timerIsAtMinute;
 
-                // If this task is scheduled as a cron based task (should only be checked if due per min)
+                // If this task is scheduled as a cron based task
                 // but the time is not at the minute mark, we won't include those tasks to be checked if due.
                 // The second based schedules are always checked.
 
-                if (canRunBasedOnTimeMarker && keyValue.Value.ScheduledEvent.IsDue(utcDate))
+                if (keyValue.Value.ScheduledEvent.IsDue(utcDate))
                 {
                     scheduledWorkers.Add(keyValue.Value);
                 }

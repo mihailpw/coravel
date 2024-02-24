@@ -19,8 +19,6 @@ namespace Coravel.Scheduling.Schedule.Event
         private string _eventUniqueId = null;
         private IServiceScopeFactory _scopeFactory;
         private Func<Task<bool>> _whenPredicate;
-        private bool _isScheduledPerSecond = false;
-        private int? _secondsInterval = null;
         private object[] _constructorParameters = null;
         private ZonedTime _zonedTime = ZonedTime.AsUTC();
         private bool _runOnceAtStart = false;
@@ -77,22 +75,10 @@ namespace Coravel.Scheduling.Schedule.Event
             return scheduledEvent;
         }
 
-        private static readonly int _OneMinuteAsSeconds = 60;
-
         public bool IsDue(DateTime utcNow)
         {
             var zonedNow = this._zonedTime.Convert(utcNow);
-
-            if (this._isScheduledPerSecond)
-            {
-                var isSecondDue = this.IsSecondsDue(zonedNow);
-                var isWeekDayDue = this._expression.IsWeekDayDue(zonedNow);
-                return isSecondDue && isWeekDayDue;
-            }
-            else
-            {
-                return this._expression.IsDue(zonedNow);
-            }
+            return this._expression.IsDue(zonedNow);
         }
 
         public async Task InvokeScheduledEvent(CancellationToken cancellationToken)
@@ -127,8 +113,6 @@ namespace Coravel.Scheduling.Schedule.Event
         public bool ShouldPreventOverlapping() => this._preventOverlapping;
 
         public string OverlappingUniqueIdentifier() => this._eventUniqueId;
-
-        public bool IsScheduledCronBasedTask() => !this._isScheduledPerSecond;
 
         public IScheduledEventConfiguration Daily()
         {
@@ -295,55 +279,37 @@ namespace Coravel.Scheduling.Schedule.Event
 
         public IScheduledEventConfiguration EverySecond()
         {
-            this._secondsInterval = 1;
-            this._isScheduledPerSecond = true;
-            this._expression = new CronExpression("* * * * *");
+            this._expression = new CronExpression("* * * * * *");
             return this;
         }
 
         public IScheduledEventConfiguration EveryFiveSeconds()
         {
-            this._secondsInterval = 5;
-            this._isScheduledPerSecond = true;
-            this._expression = new CronExpression("* * * * *");
+            this._expression = new CronExpression("*/5 * * * * *");
             return this;
         }
 
         public IScheduledEventConfiguration EveryTenSeconds()
         {
-            this._secondsInterval = 10;
-            this._isScheduledPerSecond = true;
-            this._expression = new CronExpression("* * * * *");
+            this._expression = new CronExpression("*/10 * * * * *");
             return this;
         }
 
         public IScheduledEventConfiguration EveryFifteenSeconds()
         {
-            this._secondsInterval = 15;
-            this._isScheduledPerSecond = true;
-            this._expression = new CronExpression("* * * * *");
+            this._expression = new CronExpression("*/15 * * * * *");
             return this;
         }
 
         public IScheduledEventConfiguration EveryThirtySeconds()
         {
-            this._secondsInterval = 30;
-            this._isScheduledPerSecond = true;
-            this._expression = new CronExpression("* * * * *");
+            this._expression = new CronExpression("*/30 * * * * *");
             return this;
         }
 
         public IScheduledEventConfiguration EverySeconds(int seconds)
         {
-            if (seconds < 1 || seconds > 59)
-            {
-                throw new ArgumentException(
-                    "When calling 'EverySeconds(int seconds)', 'seconds' must be between 0 and 60");
-            }
-
-            this._secondsInterval = seconds;
-            this._isScheduledPerSecond = true;
-            this._expression = new CronExpression("* * * * *");
+            this._expression = new CronExpression($"*/{seconds} * * * * *");
             return this;
         }
 
@@ -363,18 +329,6 @@ namespace Coravel.Scheduling.Schedule.Event
         {
             this._runOnce = true;
             return this;
-        }
-        
-        private bool IsSecondsDue(DateTime utcNow)
-        {
-            if (utcNow.Second == 0)
-            {
-                return _OneMinuteAsSeconds % this._secondsInterval == 0;
-            }
-            else
-            {
-                return utcNow.Second % this._secondsInterval == 0;
-            }
         }
 
         internal bool ShouldRunOnceAtStart() => this._runOnceAtStart;

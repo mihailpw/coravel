@@ -100,8 +100,10 @@ namespace Coravel.Scheduling.Schedule.Interfaces
         /// - "5,6,7"
         /// - "5-10"
         /// - "*/10"
-        /// 
+        ///
+        /// Can be 5 or 6 (extended with the seconds) part-length.
         /// For example "* * * * 0" would schedule an event to run every minute on Sundays.
+        /// For example "*/15 * * * *" would schedule an event to run every 15 seconds.
         /// </summary>
         /// <param name="cronExpression"></param>
         /// <returns></returns>

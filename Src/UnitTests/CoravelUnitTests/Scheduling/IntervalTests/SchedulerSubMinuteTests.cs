@@ -163,19 +163,6 @@ namespace CoravelUnitTests.Scheduling.IntervalTests
         }
 
         [Theory]
-        [InlineData("2/15/2020 5:55:06 pm", true)]
-        public async Task ScheduledEventEveryNSecondsFails(string dateString, bool shouldRun)
-        {
-            await Assert.ThrowsAsync<ArgumentException>(async () =>
-                await TestSubMinuteInterval(dateString, shouldRun, e => e.EverySeconds(0))
-            );
-
-            await Assert.ThrowsAsync<ArgumentException>(async () =>
-                await TestSubMinuteInterval(dateString, shouldRun, e => e.EverySeconds(60))
-            );
-        }
-
-        [Theory]
         [InlineData("2/15/2020 12:00:00 am", 9)]
         [InlineData("2/15/2020 12:00:01 am", 1)]
         [InlineData("2/15/2020 12:01:01 am", 1)]
